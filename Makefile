@@ -30,9 +30,21 @@ prepare-for-rootfs: examples
 		if [ -e $$example/host/optee_example_$$example ]; then \
 			cp -p $$example/host/optee_example_$$example $(OUTPUT_DIR)/ca/; \
 		fi; \
-		cp -pr $$example/ta/*.ta $(OUTPUT_DIR)/ta/; \
+		if ls $$example/ta/*.ta >/dev/null 2>&1; then \
+			cp -pr $$example/ta/*.ta $(OUTPUT_DIR)/ta/; \
+		fi; \
 		if [ $$example = plugins ]; then \
 			cp -p plugins/syslog/*.plugin $(OUTPUT_DIR)/plugins/; \
+		fi; \
+		if [ $$example = sdm ]; then \
+			for sub in sdm/*/; do \
+				[ -d $${sub}ta ] || continue; \
+				cp -pr $${sub}ta/*.ta $(OUTPUT_DIR)/ta/; \
+				for bin in $${sub}host/sdm_*; do \
+					[ -f $$bin ] || continue; \
+					cp -p $$bin $(OUTPUT_DIR)/ca/; \
+				done; \
+			done; \
 		fi; \
 	done
 
